@@ -1,11 +1,13 @@
-package go_movies_crud
+package main
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
 )
 
 type Movie struct {
@@ -64,11 +66,42 @@ func getMovie(w http.ResponseWriter, r *http.Request)  {
 	}
 }
 
-func createMovies()  {
-	
+func createMovies(w http.ResponseWriter, r *http.Request)  {
+	w.Header().Set("Content-Type", "application/json")
+	var movie Movie
+	_ = json.NewDecoder(r.Body).Decode(&movie)
+	movie.ID = strconv.Itoa(rand.Intn(100000000))
+	movies = append(movies, movie)
+	json.NewEncoder(w).Encode(movie)
 }
 
+func updateMovies(w http.ResponseWriter, r *http.Request) {
+	//set json content type
+	w.Header().Set("Content-Type","application/json")
+	//access params
+	params:=mux.Vars(r)
+	//range/loop over the movie
+	//delete the movie with the id you sent (this is just a hack that shouldnt be done in real databases)
+	//add a new movie that we send from the body of postman
+	for index, item:= range movies{
+		if item.ID==params["id"] {
+			movies = append(movies[:index], movies[index+1:]...)
+			var movie Movie
+			_ = json.NewDecoder(r.Body).Decode(&movie)
+			movie.ID = params["id"]
+			movies = append(movies, movie)
+			json.NewEncoder(w).Encode(movie)
+			return
+		}
+	}
 
+
+
+
+
+
+
+}
 
 func main() {
 	r:=mux.NewRouter()
